@@ -5,7 +5,7 @@ import pandas as pd
 import networkx as nx
 from dataclasses import dataclass
 
-from src.utils.visualization import generate_network
+from src.utils.visualization import generate_network_vis
 
 @dataclass
 class NetworkContext:
@@ -42,9 +42,9 @@ class NetworkAnalysis:
         for node in list(relationship_network.nodes):
             title_dict_G[node] = f"id: {node}"
             if node == self.network_context.account_id:
-                color_dict_G[node] = "#4B0082"
+                color_dict_G[node] = "#6C757D"
             else:
-                color_dict_G[node] = "#EF9900"
+                color_dict_G[node] = "#007BFF"
         nx.set_node_attributes(relationship_network, title_dict_G, "title")
         nx.set_node_attributes(relationship_network, color_dict_G, "color")
 
@@ -53,5 +53,5 @@ class NetworkAnalysis:
         nodes = self._get_network_by_max_nodes(depths)
         subgraph = relationship_network.subgraph(nodes)
         logging.info("Creating network file (HTML).")
-        generate_network(subgraph, "pyvis_network.html", physics=self.network_context.physics)
+        generate_network_vis(subgraph, "pyvis_network.html", physics=self.network_context.physics)
         logging.info("File created successfully.")
