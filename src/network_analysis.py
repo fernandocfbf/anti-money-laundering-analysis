@@ -11,7 +11,7 @@ from src.utils.visualization import generate_network_vis
 class NetworkContext:
     transactions_df: pd.DataFrame
     physics: bool
-    account_id: int
+    account_id: str
     max_depth: int
     max_nodes: int
 
