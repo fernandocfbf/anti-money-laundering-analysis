@@ -4,10 +4,11 @@ logging.basicConfig(level=logging.INFO)
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from dataclasses import dataclass
 
-from src.utils.accounts import get_account_details
-from src.utils.visualization import generate_info_card
+from src.utils.accounts import get_account_details, get_account_transactions_details
+from src.utils.visualization import generate_info_card, generate_metric_card
 
 from src.constants.theme import PRIMARY_COLOR, SECONDARY_BACKGROUND_COLOR, TEXT_COLOR
 
@@ -29,17 +30,27 @@ class ProfileAnalysis:
     
     def generate_profile_overview(self):
         acc_details = get_account_details(self.account_details_df, self.account_id)
-        col1, col2, col3, col4, col5 = st.columns(5)
+        generate_info_card("Name", acc_details["name"])
+        st.text('')
+        generate_info_card("Email", acc_details["email"])
+        st.text('')
+        generate_info_card("Mobile number", acc_details["mobile"])
+        st.text('')
+        generate_info_card("Location", acc_details["location"])
+        st.text('')
+        generate_info_card("Registration", acc_details["registration_date"])
+
+    def generate_metrics(self):
+        transaction_details = get_account_transactions_details(self.filtered_transactions_df, self.account_id)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
-            generate_info_card("Name", acc_details["name"])
+            generate_metric_card("Total amount sent", f'${transaction_details["amount_sent"]}')
         with col2:
-            generate_info_card("Email", acc_details["email"])
+            generate_metric_card("Total amount received", f'${transaction_details["amount_received"]}')
         with col3:
-            generate_info_card("Location", acc_details["location"])
+            generate_metric_card("Transactions count", transaction_details["transactions_count"])
         with col4:
-            generate_info_card("Registration", acc_details["registration_date"])
-        with col5:
-            generate_info_card("Score", "84%")
+            generate_metric_card("Laundering probability (AI prediction)", "65%")
 
     def generate_transactions_timeline_chart(self):
         transactions_timeline_df = self.filtered_transactions_df.copy()
@@ -50,7 +61,7 @@ class ProfileAnalysis:
             x="date",
             y="amount_paid",
             title='Transaction Timeline',
-            labels={"date": "Date", "amount_paid": "Total Amount Paid"},
+            labels={"date": "", "amount_paid": "Total Amount Paid"},
             markers=True,
             line_shape="linear"
         )
@@ -64,10 +75,11 @@ class ProfileAnalysis:
             font=dict(color=TEXT_COLOR),
             xaxis=dict(showgrid=False, gridcolor="lightgrey"),
             yaxis=dict(showgrid=False, gridcolor="lightgrey"),
-            hovermode="x unified"
+            hovermode="x unified",
+            title_x=0.45
         )
-        logging.info("Transaction timeline graph generated successfully.")
         st.plotly_chart(fig, use_container_width=True)
+        logging.info("Transaction timeline graph generated successfully.")
 
     def generate_payment_method_pie_chart(self):
         payment_type_df = self.filtered_transactions_df.copy()
@@ -91,7 +103,8 @@ class ProfileAnalysis:
         )
         fig.update_layout(
             plot_bgcolor=SECONDARY_BACKGROUND_COLOR,
-            paper_bgcolor=SECONDARY_BACKGROUND_COLOR
+            paper_bgcolor=SECONDARY_BACKGROUND_COLOR,
+            title_x=0.30
         )
         st.plotly_chart(fig, use_container_width=True)
 
