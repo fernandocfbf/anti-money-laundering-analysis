@@ -3,7 +3,7 @@ import streamlit as st
         
 @st.cache_data
 def get_full_transactions_dataset(account_id: int=None) -> pd.DataFrame:
-    dataframe = pd.read_csv("src/data/full_transactions_data.csv").drop(columns=["is_laundering"])
+    dataframe = pd.read_csv("src/data/full_transactions_data.csv")
     if account_id:
         return dataframe.query("sender == @account_id or receiver == @account_id")
     return dataframe

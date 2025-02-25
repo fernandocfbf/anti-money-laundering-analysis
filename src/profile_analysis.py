@@ -55,26 +55,18 @@ class ProfileAnalysis:
     def generate_transactions_timeline_chart(self):
         transactions_timeline_df = self.filtered_transactions_df.copy()
         transactions_timeline_df["date"] = pd.to_datetime(transactions_timeline_df["timestamp"]).dt.date
-        daily_transactions = transactions_timeline_df.groupby('date', as_index=False)['amount_paid'].sum()
-        fig = px.line(
-            daily_transactions,
-            x="date",
-            y="amount_paid",
-            title='Transaction Timeline',
-            labels={"date": "", "amount_paid": "Total Amount Paid"},
-            markers=True,
-            line_shape="linear"
-        )
-        fig.update_traces(
-            line=dict(color="#007bff", width=2),  # Cor primária aplicada à linha
-            marker=dict(color="#007bff", size=6, opacity=0.8)  # Cor primária aplicada aos marcadores
-        )
+        received_transactions = transactions_timeline_df.query("receiver == @self.account_id").groupby('date', as_index=False)['amount_paid'].sum()
+        sent_transactions = transactions_timeline_df.query("sender == @self.account_id").groupby('date', as_index=False)['amount_paid'].sum()
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=received_transactions.date, y=received_transactions.amount_paid, name='Received amount', line=dict(color=PRIMARY_COLOR)))
+        fig.add_trace(go.Scatter(x=sent_transactions.date, y=sent_transactions.amount_paid, name='Sent amount', line=dict(color='#fd7e14')))
         fig.update_layout(
+            title=dict(text='Transactions timeline'),
             plot_bgcolor=SECONDARY_BACKGROUND_COLOR,
             paper_bgcolor=SECONDARY_BACKGROUND_COLOR,
             font=dict(color=TEXT_COLOR),
             xaxis=dict(showgrid=False, gridcolor="lightgrey"),
-            yaxis=dict(showgrid=False, gridcolor="lightgrey"),
+            yaxis=dict(showgrid=True, gridcolor="lightgrey"),
             hovermode="x unified",
             title_x=0.45
         )
@@ -85,11 +77,11 @@ class ProfileAnalysis:
         payment_type_df = self.filtered_transactions_df.copy()
         payment_type_df = payment_type_df.groupby("payment_format", as_index=False).amount_paid.sum()
         custom_colors = {
-            "Cheque": PRIMARY_COLOR,      
-            "Credit Card": "#F28E2B", 
-            "ACH": "#E15759",         
-            "Cash": "#76B7B2",        
-            "Wire": "#59A14F",        
+            "Cheque": PRIMARY_COLOR,
+            "Credit Card": "#fd7e14",
+            "ACH": "#dc3545",
+            "Cash": "#66b3ff",
+            "Wire": "#28a745",
             "Bitcoin": "#D4A157"
         }
         fig = px.pie(
@@ -108,5 +100,27 @@ class ProfileAnalysis:
         )
         st.plotly_chart(fig, use_container_width=True)
 
+    def generate_transactions_distribuition(self):
+        fig = px.histogram(
+            self.filtered_transactions_df,
+            x="amount_paid",
+            title="Transaction Value Distribution",
+            labels={"amount_paid": "Transaction Amount"},
+            color_discrete_sequence=[PRIMARY_COLOR]
+        )
+        fig.update_layout(
+            xaxis_title="Transaction Amount (USD)",
+            yaxis_title="Frequency",
+            bargap=0.1,
+            plot_bgcolor=SECONDARY_BACKGROUND_COLOR,
+            paper_bgcolor=SECONDARY_BACKGROUND_COLOR,
+            title_x=0.30,
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
     def generate_dataframe_overview(self):
-        st.dataframe(self.filtered_transactions_df, hide_index=True, use_container_width=True)
+        st.dataframe(self.filtered_transactions_df.style.applymap(lambda x: 'background-color : white'),
+            hide_index=True,
+            height=400,
+            use_container_width=True)
