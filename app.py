@@ -24,7 +24,7 @@ with st.sidebar:
         sorted(set(accounts_details['account_id']))
     )
     st.header("Account Details")
-    
+
 profile_context = ProfileContext(accounts_details, full_transactions_dataframe, account_id)
 profile_analysis = ProfileAnalysis(profile_context)
 

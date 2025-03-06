@@ -7,6 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dataclasses import dataclass
 
+from src.machine_learning import MachineLearningModel
+
 from src.utils.accounts import get_account_details, get_account_transactions_details
 from src.utils.visualization import generate_info_card, generate_metric_card
 
@@ -50,7 +52,8 @@ class ProfileAnalysis:
         with col3:
             generate_metric_card("Transactions count", transaction_details["transactions_count"])
         with col4:
-            generate_metric_card("Laundering probability (AI prediction)", "65%")
+            score = MachineLearningModel().get_account_score(self.filtered_transactions_df)
+            generate_metric_card("Laundering probability (AI prediction)", f"{round(score*100, 2)}%")
 
     def generate_transactions_timeline_chart(self):
         transactions_timeline_df = self.filtered_transactions_df.copy()
