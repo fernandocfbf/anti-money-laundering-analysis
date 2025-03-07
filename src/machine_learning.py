@@ -10,7 +10,7 @@ class MachineLearningModel:
         self.model = joblib.load("xgb_pipeline.pkl")
 
     def _custom_transformations(self, dataframe: pd.DataFrame) -> pd.DataFrame:
-        dataframe = dataframe.drop(columns=["sender", "receiver", "is_laundering"])
+        dataframe = dataframe.drop(columns=["sender", "receiver"])
         dataframe["timestamp"] = pd.to_datetime(dataframe["timestamp"])
         dataframe["timestamp"] = dataframe["timestamp"].apply(lambda timestamp_value: timestamp_value.value)
         return dataframe

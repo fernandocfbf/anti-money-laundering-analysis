@@ -15,7 +15,7 @@ st.markdown(
 )
 st.markdown("---")
 accounts_details = get_accounts_details_dataset()
-full_transactions_dataframe = get_full_transactions_dataset()
+full_transactions_dataframe = get_full_transactions_dataset(visualization=True)
 
 with st.sidebar:
     st.header("Analysis Filters")

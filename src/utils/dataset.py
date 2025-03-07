@@ -2,8 +2,10 @@ import pandas as pd
 import streamlit as st
         
 @st.cache_data
-def get_full_transactions_dataset(account_id: str=None) -> pd.DataFrame:
+def get_full_transactions_dataset(visualization=False) -> pd.DataFrame:
     dataframe = pd.read_csv("src/data/full_transactions_data.csv")
+    if visualization:
+        return dataframe.drop(columns=["is_laundering"])
     return dataframe
 
 @st.cache_data
