@@ -1,6 +1,7 @@
 import logging 
 logging.basicConfig(level=logging.INFO)
-
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -45,10 +46,11 @@ class ProfileAnalysis:
     def generate_metrics(self):
         transaction_details = get_account_transactions_details(self.filtered_transactions_df, self.account_id)
         col1, col2, col3, col4 = st.columns(4)
+        
         with col1:
-            generate_metric_card("Total amount sent", f'${transaction_details["amount_sent"]}')
+            generate_metric_card("Total amount sent", f'{locale.currency(transaction_details["amount_sent"], grouping=True, symbol=True)}')
         with col2:
-            generate_metric_card("Total amount received", f'${transaction_details["amount_received"]}')
+            generate_metric_card("Total amount received", f'{locale.currency(transaction_details["amount_received"], grouping=True, symbol=True)}')
         with col3:
             generate_metric_card("Transactions count", transaction_details["transactions_count"])
         with col4:
@@ -61,18 +63,55 @@ class ProfileAnalysis:
         received_transactions = transactions_timeline_df.query("receiver == @self.account_id").groupby('date', as_index=False)['amount_paid'].sum()
         sent_transactions = transactions_timeline_df.query("sender == @self.account_id").groupby('date', as_index=False)['amount_paid'].sum()
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=received_transactions.date, y=received_transactions.amount_paid, name='Received amount', line=dict(color=PRIMARY_COLOR)))
-        fig.add_trace(go.Scatter(x=sent_transactions.date, y=sent_transactions.amount_paid, name='Sent amount', line=dict(color='#fd7e14')))
+        fig.add_trace(go.Scatter(
+            x=received_transactions.date, 
+            y=received_transactions.amount_paid, 
+            name='Received amount', 
+            line=dict(color=PRIMARY_COLOR, width=2.5, shape="spline"),  
+            mode='lines+markers', 
+            marker=dict(size=6)  
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=sent_transactions.date, 
+            y=sent_transactions.amount_paid, 
+            name='Sent amount', 
+            line=dict(color='#fd7e14', width=2.5, shape="spline"),
+            mode='lines+markers',
+            marker=dict(size=6)
+        ))
+
         fig.update_layout(
-            title=dict(text='Transactions timeline'),
+            title=dict(text='Transactions Timeline', x=0.45),
             plot_bgcolor=SECONDARY_BACKGROUND_COLOR,
             paper_bgcolor=SECONDARY_BACKGROUND_COLOR,
             font=dict(color=TEXT_COLOR),
-            xaxis=dict(showgrid=False, gridcolor="lightgrey"),
-            yaxis=dict(showgrid=True, gridcolor="lightgrey"),
+            xaxis=dict(
+                showgrid=False,
+                gridcolor="lightgrey",
+                tickangle=0,
+                showline=True,
+                linecolor='lightgrey',
+                tickfont=dict(size=12)
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor="lightgrey",
+                title="Amount",
+                zeroline=True,
+                zerolinecolor="lightgrey",
+                tickfont=dict(size=12)
+            ),
             hovermode="x unified",
-            title_x=0.45
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
         )
+
         st.plotly_chart(fig, use_container_width=True)
         logging.info("Transaction timeline graph generated successfully.")
 
@@ -92,14 +131,27 @@ class ProfileAnalysis:
             names="payment_format", 
             values="amount_paid", 
             title="Payment Method Distribution",
-            hole=0.4,
+            hole=0.55,  
             color="payment_format",
             color_discrete_map=custom_colors
         )
+
+        fig.update_traces(
+            textinfo='percent', 
+            pull=[0.005] * len(payment_type_df)
+        )
+
         fig.update_layout(
+            title=dict(text="Payment Method Distribution", x=0.3),
             plot_bgcolor=SECONDARY_BACKGROUND_COLOR,
             paper_bgcolor=SECONDARY_BACKGROUND_COLOR,
-            title_x=0.30
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.2,
+                xanchor="center",
+                x=0.5
+            )
         )
         st.plotly_chart(fig, use_container_width=True)
 
