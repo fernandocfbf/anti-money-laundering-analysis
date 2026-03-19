@@ -64,5 +64,3 @@ class PreprocessTransactions:
 
         X_transformed[self.numeric_cols_] = X_num
         return X_transformed
-
-
