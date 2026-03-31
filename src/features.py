@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 class TransactionFeatures:
     def transform(self, X:pd.DataFrame) -> pd.DataFrame:
@@ -27,12 +28,17 @@ class TimeFeatures:
         time_df = X.copy()
         time_df["days_from_ref"] = (time_df["max_transaction_date"] - time_df["transaction_date"]).dt.days
         bins = [-1, 7, 30, 90]
-        labels = ["7d", "30d", "90d"]
+        expected_windows = ["7d", "30d", "90d"]
+        expected_directions = X["direction"].unique()
+        expected_metrics = ["total_amount", "transaction_count"]
+        multi_cols = pd.MultiIndex.from_product(
+            [expected_metrics, expected_directions, expected_windows]
+        )
 
         time_df["window"] = pd.cut(
             time_df["days_from_ref"],
             bins=bins,
-            labels=labels
+            labels=expected_windows
         )
         time_df["window"] = time_df["window"].astype(str)
         
@@ -50,6 +56,7 @@ class TimeFeatures:
                 fill_value=0
             )
         )
+        time_behavior_df = time_behavior_df.reindex(columns=multi_cols, fill_value=0)
         time_behavior_df.columns = [f"{metric}_{direction}_{window}" for metric, direction, window in time_behavior_df.columns]
         time_behavior_df = time_behavior_df.reset_index()
         return time_behavior_df
@@ -59,10 +66,20 @@ class RatioFeatures:
         ratio_df = X.copy()
         ratio_df["sent_received_ratio"] = ratio_df["total_amount_sent"]/(ratio_df["total_amount_received"] + 1)
         ratio_df["transaction_direction_ratio"] = ratio_df["transaction_count_sent"]/(ratio_df["transaction_count_received"] + 1)
-        ratio_df["total_amount_30d_ratio"] = ratio_df["total_amount_sent_30d"] / (ratio_df["total_amount_received_30d"] + 1e-6)
-        ratio_df["total_amount_7d_ratio"] = ratio_df["total_amount_sent_7d"] / (ratio_df["total_amount_received_7d"] + 1e-6)
-        ratio_df["transaction_count_30d_ratio"] = ratio_df["transaction_count_sent_30d"] / (ratio_df["transaction_count_received_30d"] + 1e-6)
-        ratio_df["transaction_count_7d_ratio"] = ratio_df["transaction_count_sent_7d"] / (ratio_df["transaction_count_received_7d"] + 1e-6)
+        
+        windows = {
+            col.split("_")[-1]
+            for col in ratio_df.columns
+            if col.startswith(("total_amount_", "transaction_count_")) and col.count("_") >= 3
+        }
+        metrics = ["total_amount", "transaction_count"]
+        for metric in metrics:
+            for time_window in windows:
+                ratio_df[f"{metric}_{time_window}_ratio"] = ratio_df[f"{metric}_sent_{time_window}"] / (ratio_df[f"{metric}_received_{time_window}"] + 1e-6)
+
+        #ratio_df["total_amount_7d_ratio"] = ratio_df["total_amount_sent_7d"] / (ratio_df["total_amount_received_7d"] + 1e-6)
+        #ratio_df["transaction_count_30d_ratio"] = ratio_df["transaction_count_sent_30d"] / (ratio_df["transaction_count_received_30d"] + 1e-6)
+        #ratio_df["transaction_count_7d_ratio"] = ratio_df["transaction_count_sent_7d"] / (ratio_df["transaction_count_received_7d"] + 1e-6)
         return ratio_df
     
 class FeatureGenerator:
