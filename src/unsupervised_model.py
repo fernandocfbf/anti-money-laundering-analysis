@@ -1,70 +1,68 @@
 # utils
-import pandas as pd
 import numpy as np
-from tqdm import tqdm
+from sklearn.base import BaseEstimator
 
 # model
 from sklearn.ensemble import IsolationForest
 from hdbscan import HDBSCAN
-from sklearn.cluster import KMeans
 
-from scipy.spatial.distance import mahalanobis
-
-#scaler
-from sklearn.preprocessing import MinMaxScaler
-
-class IsolationForestModel:
+class IsolationForestModel(BaseEstimator):
     def __init__(self, model_params=None):
         if model_params is None:
             model_params = {}
         self.model = IsolationForest(**model_params)
     
-    def fit_predict(self, X):
-        return (-1)*self.model.score_samples(X)
+    def fit(self, X, y=None):
+        self.model.fit(X)
+        return self
     
-class HDBScanModel:
+    def score_samples(self, X):
+        return -self.model.score_samples(X)
+    
+class HDBScanModel(BaseEstimator):
     def __init__(self, model_params=None):
         if model_params is None:
             model_params = {}
         self.model = HDBSCAN(**model_params)
 
-    def fit_predict(self, X):
-        return self.model.fit_predict(X).outlier_scores_
+    def fit(self, X, y=None):
+        self.model.fit(X)
+        self.train_scores_ = self.model.outlier_scores_
+        return self
     
-class PeerDeviationModel:
-    def __init__(self, model_params=None):
-        if model_params is None:
-            model_params = {}
-        self.model = KMeans(**model_params)
+    def score_samples(self, X):
+        if hasattr(self, "train_scores_") and len(X) == len(self.train_scores_):
+            return self.train_scores_
+        raise ValueError("X doesn't contain same length as train data.")
 
-    def fit_predict(self, X):
-        cluster_columns = [f"col_{i}" for i in range(X.shape[1])]
-        clustering_df = pd.DataFrame(X, cluster_columns)
-        clustering_df["kmeans_cluster"] = self.model.fit_predict(X)
+class AMLAnomalyEnsemble:
+    def __init__(self, models, weights=None):
+        self.models = models
+        self.weights = self._define_weights(weights)
 
-        progress_bar = tqdm(clustering_df["kmeans_cluster"].unique(), desc="Calculating Mahalanobis Distances")
-        for cluster in clustering_df["kmeans_cluster"].unique():
-            cluster_mask = clustering_df["kmeans_cluster"] == cluster
-            cluster_idx = clustering_df[cluster_mask].index
-
-            x_cluster = X[cluster_mask]
-            x_cluster_df = pd.DataFrame(x_cluster, columns=cluster_columns, index=cluster_idx)
-
-            mu = np.mean(x_cluster, axis=0)
-            cov = np.cov(x_cluster, rowvar=False)
-            cov += np.eye(cov.shape[0]) * 1e-6
-
-            cov_inv = np.linalg.pinv(cov)
-            
-            x_cluster_df["mahalanobis_distance"] = x_cluster_df.apply(lambda row: mahalanobis(row, mu, cov_inv), axis=1)
-            x_cluster_df["mahalanobis_risk_score"] = MinMaxScaler(feature_range=(0, 1)).fit_transform(x_cluster_df[["mahalanobis_distance"]])
-            
-            clustering_df.loc[cluster_mask, "mahalanobis_distance"] = x_cluster_df["mahalanobis_distance"]
-            clustering_df.loc[cluster_mask, "mahalanobis_risk_score"] = x_cluster_df["mahalanobis_risk_score"]
-            
-            progress_bar.update(1)
-        progress_bar.close()
-        return np.array(clustering_df["mahalanobis_risk_score"])
+    def _define_weights(self, weights):
+        num_models = len(self.models)
+        if weights is None:
+            return [1/num_models] * num_models
+        elif len(weights) != num_models:
+            raise ValueError("Not enougth weights provided.")
+        return weights
+        
+    def fit(self, X):
+        self.fitted_ = True
+        self.train_scores_ = []
+        for i, model in enumerate(self.models):
+            model.fit(X)
+            scores = model.score_samples(X).reshape(-1, 1)
+            self.train_scores_.append(scores)
+        return self
     
-
-    
+    def score(self, X):
+        if not hasattr(self, "fitted_"):
+            raise ValueError("You must call fit before score.")
+        all_scores = []
+        for i, model in enumerate(self.models):
+            scores = model.score_samples(X).reshape(-1, 1)
+            all_scores.append(scores)
+        stacked = np.hstack(all_scores)
+        return np.dot(stacked, self.weights)
