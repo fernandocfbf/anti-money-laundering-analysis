@@ -76,10 +76,6 @@ class RatioFeatures:
         for metric in metrics:
             for time_window in windows:
                 ratio_df[f"{metric}_{time_window}_ratio"] = ratio_df[f"{metric}_sent_{time_window}"] / (ratio_df[f"{metric}_received_{time_window}"] + 1e-6)
-
-        #ratio_df["total_amount_7d_ratio"] = ratio_df["total_amount_sent_7d"] / (ratio_df["total_amount_received_7d"] + 1e-6)
-        #ratio_df["transaction_count_30d_ratio"] = ratio_df["transaction_count_sent_30d"] / (ratio_df["transaction_count_received_30d"] + 1e-6)
-        #ratio_df["transaction_count_7d_ratio"] = ratio_df["transaction_count_sent_7d"] / (ratio_df["transaction_count_received_7d"] + 1e-6)
         return ratio_df
     
 class FeatureGenerator:
