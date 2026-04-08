@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 
+@st.cache_data
 def get_raw_transactions(path_to_file:str="src/data/HI-Small_Trans.csv") -> pd.DataFrame:
     return pd.read_csv(path_to_file)
 
