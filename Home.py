@@ -5,8 +5,10 @@ st.set_page_config(
     page_title="AML Analysis"
 )
 
-st.title("AML Transaction Scoring")
-st.caption("Upload transaction data and detect suspicious activity with explanations")
+col_left, col_center, col_right = st.columns([1, 2, 1])
+with col_center:
+    st.title("AML Customer Scoring")
+    st.caption("Upload transaction data and detect suspicious activity with explanations")
 
 col1, col2 = st.columns(2)
 

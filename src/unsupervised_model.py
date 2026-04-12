@@ -1,10 +1,18 @@
 # utils
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator
 
 # model
 from sklearn.ensemble import IsolationForest
 from hdbscan import HDBSCAN
+
+# sklearn
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
+
+#scipy
+from scipy.spatial.distance import mahalanobis
 
 class IsolationForestModel(BaseEstimator):
     def __init__(self, model_params=None):
@@ -34,6 +42,63 @@ class HDBScanModel(BaseEstimator):
         if hasattr(self, "train_scores_") and len(X) == len(self.train_scores_):
             return self.train_scores_
         raise ValueError("X doesn't contain same length as train data.")
+
+class MahalanobisModel(BaseEstimator):
+    def __init__(self, model_params=None):
+        if model_params is None:
+            model_params = {}
+        self.kmeans_model_ = KMeans(**model_params)
+        self.n_clusters = model_params.get("n_clusters", 7)
+        self.cluster_stats_ = {}
+        self.scalers_ = {}
+
+    def fit(self, X, y=None):
+        self.kmeans_model_.fit(X)
+        labels = self.kmeans_model_.labels_
+        for cluster in range(self.n_clusters):
+            cluster_mask = labels == cluster
+            X_cluster = X[cluster_mask]
+
+            # Edge case: very small cluster size -> global stats
+            if len(X_cluster) < 2:
+                mu = np.mean(X, axis=0)
+                cov = np.cov(X, rowvar=False)
+            else:
+                mu = np.mean(X_cluster, axis=0)
+                cov = np.cov(X_cluster, rowvar=False)
+            cov += np.eye(cov.shape[0]) * 1e-6
+            cov_inv = np.linalg.pinv(cov)
+            diff = X_cluster - mu
+            distances = np.sqrt(np.sum(diff @ cov_inv * diff, axis=1))
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            scaler.fit(distances.reshape(-1, 1))
+            self.cluster_stats_[cluster] = {
+                "mu": mu,
+                "cov_inv": cov_inv
+            }
+            self.scalers_[cluster] = scaler
+        return self
+    
+    def score_samples(self, X):
+        if not hasattr(self, "kmeans_model_"):
+            raise ValueError("You must call fit before score_samples.")
+        X = np.asarray(X)
+        clusters = self.kmeans_model_.predict(X)
+        scores = np.zeros(X.shape[0])
+        for cluster in range(self.n_clusters):
+            cluster_mask = clusters == cluster
+            if not np.any(cluster_mask):
+                continue
+            X_cluster = X[cluster_mask]
+            stats = self.cluster_stats_[cluster]
+            mu = stats["mu"]
+            cov_inv = stats["cov_inv"]
+            diff = X_cluster - mu
+            distances = np.sqrt(np.sum(diff @ cov_inv * diff, axis=1))
+            scaler = self.scalers_[cluster]
+            distances_scaled = scaler.transform(distances.reshape(-1, 1)).ravel()
+            scores[cluster_mask] = distances_scaled
+        return scores
 
 class AMLAnomalyEnsemble:
     def __init__(self, models, weights=None):
