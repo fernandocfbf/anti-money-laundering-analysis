@@ -9,6 +9,7 @@ import streamlit as st
 #model
 from sklearn.pipeline import Pipeline
 from src.unsupervised_model import AMLAnomalyEnsemble, IsolationForestModel, HDBScanModel, MahalanobisModel
+from sklearn.ensemble import RandomForestRegressor
 
 #preprocess
 from sklearn.preprocessing import FunctionTransformer, RobustScaler, StandardScaler
@@ -56,3 +57,13 @@ def get_model(random_state=42) -> AMLAnomalyEnsemble:
     ]
 
     return AMLAnomalyEnsemble(models=models, weights=[0.4, 0.3, 0.3])
+
+def get_surrogate_model(random_state=42) -> RandomForestRegressor:
+    return RandomForestRegressor(
+        n_estimators=60,
+        max_depth=12,
+        min_samples_leaf=10,
+        max_features="sqrt",
+        random_state=random_state,
+        n_jobs=-1
+    )
