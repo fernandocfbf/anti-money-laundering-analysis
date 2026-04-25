@@ -1,4 +1,5 @@
 # utils
+import time
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
@@ -117,9 +118,11 @@ class AMLAnomalyEnsemble:
         self.fitted_ = True
         self.train_scores_ = []
         for i, model in enumerate(self.models):
+            start_time = time.time()
             model.fit(X)
             scores = model.score_samples(X).reshape(-1, 1)
             self.train_scores_.append(scores)
+            print(f"Model {type(model.named_steps["model"]).__name__} fitted ({round(time.time() - start_time, 1)}s)") 
         return self
     
     def score(self, X):
@@ -127,7 +130,9 @@ class AMLAnomalyEnsemble:
             raise ValueError("You must call fit before score.")
         all_scores = []
         for i, model in enumerate(self.models):
+            start_time = time.time()
             scores = model.score_samples(X).reshape(-1, 1)
             all_scores.append(scores)
+            print(f"Model {type(model.named_steps["model"]).__name__} scored ({round(time.time() - start_time, 1)}s)") 
         stacked = np.hstack(all_scores)
         return np.dot(stacked, self.weights)

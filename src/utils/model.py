@@ -13,6 +13,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 #preprocess
 from sklearn.preprocessing import FunctionTransformer, RobustScaler, StandardScaler
+from sklearn.decomposition import PCA
 
 def get_model(random_state=42) -> AMLAnomalyEnsemble:
     log_transformer = FunctionTransformer(np.log1p, validate=False)
@@ -41,6 +42,7 @@ def get_model(random_state=42) -> AMLAnomalyEnsemble:
     pipeline_hdbscan = Pipeline([
         ("log", log_transformer),
         ("scaler", RobustScaler()),
+        ("pca", PCA(n_components=0.95, random_state=random_state)),
         ("model", HDBScanModel(hdbscan_params))
     ])
 
