@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # personalized modules
+from src.utils.translate import get_translator
 from src.utils.model import get_model
 from src.utils.dataset import get_raw_transactions
 from src.explanability import SHAPExplainer
 from src.features import FeatureGenerator
+
+page_text_dict = get_translator()
 
 # constants
 DATA_PATH = f"src\\data\\output\\raw_transactions.csv"
@@ -19,11 +23,30 @@ st.markdown("""
         .block-container {
             padding-top: 1rem;
             padding-bottom: 1rem;
-        }      
+        }
+        [data-testid="stMetric"] > div {
+            background-color: #FFFFFF;
+            padding: 1rem 1rem 1rem 2rem;
+            border-radius: 1rem;
+        }
+        [data-testid="stMetricValue"] > div {
+            font-size: 1.5rem;
+        }
+        [data-testid="stMetricLabel"] > div {
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+        [data-testid="stPlotlyChart"] > div {
+            background-color: #FFFFFF;
+            border-radius: 1rem;
+        }
     </style>
 """, unsafe_allow_html=True)
 
 # ---- INIT STATE ----
+if "lang" not in st.session_state:
+    st.session_state.lang = "EN"
+
 if "raw_data" not in st.session_state:
     st.session_state.raw_data = None
 
@@ -33,112 +56,232 @@ if "top_offenders_df" not in st.session_state:
 if "feature_df" not in st.session_state:
     st.session_state.feature_df = None
 
-col_left, col_center, col_right = st.columns([1, 3, 1])
+if "results_expander" not in st.session_state:
+    st.session_state.results_expander = False
+
+if "data_source_expander" not in st.session_state:
+    st.session_state.data_source_expander = True
+
+if "threshold" not in st.session_state:
+    st.session_state.threshold = 0.6
+
+# ---- SIDEBAR ----
+with st.sidebar:
+    lang = st.segmented_control(
+        page_text_dict[st.session_state.lang]["home"]["language"],
+        default=st.session_state.lang,
+        options=["EN", "PT"],
+        selection_mode="single"
+    )
+    st.session_state.lang = lang
+    
+t = page_text_dict[st.session_state.lang]["upload_and_run"]
+
+col_left, col_center, col_right = st.columns([1, 6, 1])
 
 with col_center:
-    st.title("AML Customer Scoring")
-    st.caption("Upload your data or try a demo to see how it works")
+    st.title(t["page"]["title"])
+    st.caption(t["page"]["subtitle"])
 
-    data_source_expander = True
-    results_expander = False
+    with st.expander(t["data_source"]["title"], expanded=st.session_state.data_source_expander):
 
-    with st.expander("1. Data Source", expanded=data_source_expander):
+        options = [
+            t["data_source"]["options"]["demo"],
+            t["data_source"]["options"]["upload"]
+        ]
+
         selection = st.segmented_control(
-            label="Choose input method",
-            options=["Demo Data", "Upload CSV"],
-            default="Demo Data",
+            label=t["data_source"]["input_method"],
+            options=options,
+            default=options[0],
             width="stretch"
         )
 
-        st.divider()
+        st.write("")
 
-        if selection == "Upload CSV":
-            st.write("Upload a CSV file containing transaction-level data. The file must follow the required format with appropriate columns for processing.")
+        if selection == t["data_source"]["options"]["upload"]:
+            st.write(t["data_source"]["upload"]["description"])
             uploaded_file = st.file_uploader(
-                "Upload transactions file",
+                t["data_source"]["upload"]["label"],
                 type=["csv"],
-                help="Accepted format: CSV with transaction-level data"
+                help=t["data_source"]["upload"]["help"]
             )
             if uploaded_file is not None:
                 st.session_state.raw_data = pd.read_csv(uploaded_file)
-                st.success("File uploaded successfully")
+                st.success(t["data_source"]["upload"]["success"])
         else:
-            st.write("Select the percentage of the demo dataset to load. The demo dataset contains synthetic transaction data for testing purposes.")
+            st.write(t["data_source"]["demo"]["description"])
             sample_pct = st.number_input(
-                "Sample percentage",
+                t["data_source"]["demo"]["label"],
                 min_value=0.01,
                 max_value=100.0,
-                value=50.0,
+                value=40.0,
                 format="%0.1f",
                 step=0.5,
-                help="Percentage of the demo dataset to load (e.g., 10 for 10%)"
+                help=t["data_source"]["demo"]["help"]
             )
-        st.divider()
-        st.write("Select the score threshold for explaining customers. Only customers with a risk score above this threshold will have explanations generated.")
+
+        st.write("")
+        st.write(t["data_source"]["threshold"]["description"])
+
         explanability_threshold = st.number_input(
-            "Explanability threshold",
+            t["data_source"]["threshold"]["label"],
             min_value=0.01,
             max_value=1.0,
             value=0.6,
             format="%0.2f",
             step=0.05,
-            help="Threshold for generating explanations (e.g., 0.6 means only customers with a score above 0.6 will be explained)"
+            help=t["data_source"]["threshold"]["help"]
         )
 
-        if (st.session_state.raw_data is None and selection == "Upload CSV"):
+        st.session_state.threshold = explanability_threshold
+
+        if (st.session_state.raw_data is None and selection == t["data_source"]["options"]["upload"]):
             run_disabled = True
-        else: 
+        else:
             run_disabled = False
 
-        run_clicked = st.button("Run Model", disabled=run_disabled,  use_container_width=True)
-            
-        if run_clicked:    
-            progress_bar = st.progress(0, text="Processing uploaded data...")
-            st.session_state.raw_data = get_raw_transactions(DATA_PATH, sample_percentage=sample_pct / 100)
+        run_clicked = st.button(
+            t["data_source"]["run_button"],
+            disabled=run_disabled,
+            use_container_width=True
+        )
+
+        if run_clicked:
+            progress_bar = st.progress(0, text=t["data_source"]["progress"]["processing"])
+
+            st.session_state.raw_data = get_raw_transactions(
+                DATA_PATH,
+                sample_percentage=sample_pct / 100
+            )
             raw_data = st.session_state.raw_data
 
-            # Step 1
-            progress_bar.progress(20, text="Generating customer profiles...")
+            progress_bar.progress(20, text=t["data_source"]["progress"]["features"])
             fg = FeatureGenerator()
             fg.fit(raw_data)
             feature_df = fg.transform(raw_data)
 
-            # Step 2
-            progress_bar.progress(40, text="Preparing model input...")
+            progress_bar.progress(40, text=t["data_source"]["progress"]["prepare"])
             feature_columns = [c for c in feature_df.columns if c != "customer_id"]
             X = feature_df[feature_columns]
 
-            # Step 4
-            progress_bar.progress(60, text="Training model...")
+            progress_bar.progress(60, text=t["data_source"]["progress"]["training"])
             model = get_model(random_state=RANDOM_STATE)
             model.fit(X)
 
-            # Step 5
-            progress_bar.progress(80, text="Generating scores...")
+            progress_bar.progress(80, text=t["data_source"]["progress"]["scoring"])
             scores = model.score(X)
             feature_df["final_score"] = scores
 
-            # Step 6
-            progress_bar.progress(95, text="Generating explanations...")
-            explainer = SHAPExplainer(threshold=explanability_threshold, random_state=RANDOM_STATE)
+            progress_bar.progress(95, text=t["data_source"]["progress"]["explanations"])
+            explainer = SHAPExplainer(
+                threshold=explanability_threshold,
+                random_state=RANDOM_STATE
+            )
             explanations = explainer.explain(feature_df, "final_score")
             feature_df["explanation"] = explanations
 
-            progress_bar.progress(100, text="Done!")
+            progress_bar.progress(100, text=t["data_source"]["progress"]["done"])
 
-            # Save results
             feature_df = feature_df.sort_values(by="final_score", ascending=False).reset_index(drop=True)
             top_offenders_df = feature_df[feature_df["final_score"] >= explanability_threshold]
+
             st.session_state.feature_df = feature_df
-            st.session_state.top_offenders_df = top_offenders_df[["customer_id", "final_score", "explanation"]]
+            st.session_state.top_offenders_df = top_offenders_df[
+                ["customer_id", "final_score", "explanation"]
+            ]
 
-            st.success("Model run completed successfully!")
-            data_source_expander = False
-            results_expander = True
+            st.success(t["data_source"]["success"])
+            st.session_state.data_source_expander = False
+            st.session_state.results_expander = True
 
-    with st.expander("2. Model Results", expanded=results_expander):
-        if st.session_state.top_offenders_df is not None:
-            st.write("Top offenders based on their risk scores (above the selected threshold)")
-            st.dataframe(st.session_state.top_offenders_df)
+    with st.expander(t["results"]["title"], expanded=st.session_state.results_expander):
+
+        if st.session_state.top_offenders_df is not None and st.session_state.feature_df is not None:
+
+            feature_df = st.session_state.feature_df
+            top_df = st.session_state.top_offenders_df
+
+            total_customers = len(feature_df)
+            high_risk_customers = len(top_df)
+            high_risk_pct = high_risk_customers / total_customers * 100
+            avg_score = feature_df["final_score"].mean()
+
+            st.write("")
+            col1, col2, col3, col4 = st.columns(4)
+
+            col1.metric(t["results"]["metrics"]["total"], f"{total_customers:,}")
+            col2.metric(t["results"]["metrics"]["high_risk"], f"{high_risk_customers:,}")
+            col3.metric(t["results"]["metrics"]["high_risk_pct"], f"{high_risk_pct:.2f}%")
+            col4.metric(t["results"]["metrics"]["avg_score"], f"{avg_score:.3f}")
+
+            st.divider()
+
+            fig = px.histogram(
+                feature_df,
+                x="final_score",
+                nbins=30,
+                title=t["results"]["chart"]["title"],
+                opacity=0.85,
+                color_discrete_sequence=["#1C6ED5"]
+            )
+
+            fig.add_vline(
+                x=explanability_threshold,
+                line_dash="dash",
+                line_color="#E63946",
+                annotation_text=t["results"]["chart"]["threshold"],
+                annotation_position="top right"
+            )
+
+            fig.update_layout(
+                template="plotly_white",
+                bargap=0.05,
+                xaxis_title=t["results"]["chart"]["x"],
+                yaxis_title=t["results"]["chart"]["y"],
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=40, r=40, t=80, b=40),
+                title=dict(x=0.02)
+            )
+
+            st.plotly_chart(fig, width="stretch")
+
+            st.divider()
+
+            st.write(t["results"]["table"]["title"])
+
+            cols = t["results"]["table"]["columns"]
+
+            display_df = (
+                top_df.rename(columns={
+                    "customer_id": cols["customer_id"],
+                    "final_score": cols["final_score"],
+                    "explanation": cols["explanation"]
+                })
+                .style.format({cols["final_score"]: "{:.3f}"})
+            )
+
+            download_df = (
+                feature_df[["customer_id", "final_score", "explanation"]]
+                .rename(columns={
+                    "customer_id": cols["customer_id"],
+                    "final_score": cols["final_score"],
+                    "explanation": cols["explanation"]
+                })
+            )
+
+            download_df[cols["final_score"]] = download_df[cols["final_score"]].round(3)
+
+            st.dataframe(display_df)
+
+            st.download_button(
+                t["results"]["download"]["button"],
+                data=download_df.to_csv(index=False),
+                file_name=t["results"]["download"]["file_name"],
+                mime="text/csv",
+                type="primary"
+            )
+
         else:
-            st.write("After running the model, the results will be displayed here. You can view the top customers based on their risk scores and see the explanations for their scores.")
+            st.write(t["results"]["empty"])

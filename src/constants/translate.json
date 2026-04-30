@@ -1,0 +1,182 @@
+{
+    "EN": {
+        "home": {
+            "language": "Language",
+            "hero": {
+                "title": "AML Customer Scoring",
+                "subtitle": "Upload transaction data and detect suspicious activity with explainable risk scoring"
+            },
+            "cards": {
+                "analysis": {
+                    "title": "Run Analysis",
+                    "description": "Upload your transaction dataset and generate AML risk scores using anomaly detection models.",
+                    "button": "Upload & Run Analysis"
+                },
+                "methodology": {
+                    "title": "How It Works",
+                    "description": "Explore how the models generate risk scores and understand predictions with explainability tools.",
+                    "button": "View Methodology"
+                }
+            }
+        },
+        "upload_and_run": {
+            "page": {
+                "title": "AML Customer Scoring",
+                "subtitle": "Upload your data or try a demo to see how it works"
+            },
+            "data_source": {
+                "title": "1. Data Source",
+                "input_method": "Choose input method",
+                "options": {
+                    "demo": "Demo Data",
+                    "upload": "Upload CSV"
+                },
+                "upload": {
+                    "description": "Upload a CSV file containing transaction-level data. The file must follow the required format with appropriate columns for processing.",
+                    "label": "Upload transactions file",
+                    "help": "Accepted format: CSV with transaction-level data",
+                    "success": "File uploaded successfully"
+                },
+                "demo": {
+                    "description": "Select the percentage of the demo dataset to load. The demo dataset contains synthetic transaction data for testing purposes.",
+                    "label": "Sample percentage",
+                    "help": "Percentage of the demo dataset to load (e.g., 10 for 10%)"
+                },
+                "threshold": {
+                    "description": "Select the score threshold for explaining customers. Only customers with a risk score above this threshold will have explanations generated.",
+                    "label": "Explanability threshold",
+                    "help": "Threshold for generating explanations (e.g., 0.6 means only customers with a score above 0.6 will be explained)"
+                },
+                "run_button": "Run Model",
+                "progress": {
+                    "processing": "Processing uploaded data...",
+                    "features": "Generating customer profiles...",
+                    "prepare": "Preparing model input...",
+                    "training": "Training model...",
+                    "scoring": "Generating scores...",
+                    "explanations": "Generating explanations...",
+                    "done": "Done! (Results below)"
+                },
+                "success": "Model run completed successfully!"
+            },
+            "results": {
+                "title": "2. Model Results",
+                "metrics": {
+                    "total": "Total Customers",
+                    "high_risk": "High Risk Customers",
+                    "high_risk_pct": "High Risk %",
+                    "avg_score": "Avg Risk Score"
+                },
+                "chart": {
+                    "title": "Risk Score Distribution",
+                    "x": "Risk Score",
+                    "y": "Customer Count",
+                    "threshold": "High Risk Threshold"
+                },
+                "table": {
+                    "title": "Top offenders based on their risk scores (above the selected threshold)",
+                    "columns": {
+                        "customer_id": "Customer ID",
+                        "final_score": "Risk Score",
+                        "explanation": "Explanation"
+                    }
+                },
+                "download": {
+                    "button": "Download Results",
+                    "file_name": "aml_results.csv"
+                },
+                "empty": "After running the model, the results will be displayed here."
+            }
+        }
+    },
+    "PT": {
+        "home": {
+            "language": "Idioma",
+            "hero": {
+                "title": "Pontuação de Clientes AML",
+                "subtitle": "Envie dados de transações e detecte atividades suspeitas com pontuação de risco explicável"
+            },
+            "cards": {
+                "analysis": {
+                    "title": "Executar Análise",
+                    "description": "Envie seu conjunto de dados de transações e gere pontuações de risco AML usando modelos de detecção de anomalias.",
+                    "button": "Enviar e Executar Análise"
+                },
+                "methodology": {
+                    "title": "Como Funciona",
+                    "description": "Explore como os modelos geram pontuações de risco e entenda as previsões com ferramentas de explicabilidade.",
+                    "button": "Ver Metodologia"
+                }
+            }
+        },
+        "upload_and_run": {
+            "page": {
+                "title": "Pontuação de Clientes AML",
+                "subtitle": "Envie seus dados ou use um demo para ver como funciona"
+            },
+            "data_source": {
+                "title": "1. Fonte de Dados",
+                "input_method": "Escolha o método de entrada",
+                "options": {
+                    "demo": "Dados de Demonstração",
+                    "upload": "Enviar CSV"
+                },
+                "upload": {
+                    "description": "Envie um arquivo CSV contendo dados de transações em nível de transação. O arquivo deve seguir o formato esperado com as colunas apropriadas para processamento.",
+                    "label": "Enviar arquivo de transações",
+                    "help": "Formato aceito: CSV com dados de transações",
+                    "success": "Arquivo enviado com sucesso"
+                },
+                "demo": {
+                    "description": "Selecione a porcentagem do dataset de demonstração a ser carregada. O dataset contém dados sintéticos para testes.",
+                    "label": "Porcentagem da amostra",
+                    "help": "Porcentagem do dataset a ser carregada (ex: 10 para 10%)"
+                },
+                "threshold": {
+                    "description": "Selecione o limite de score para gerar explicações. Apenas clientes com score acima desse valor terão explicações geradas.",
+                    "label": "Limite de explicabilidade",
+                    "help": "Limite para geração de explicações (ex: 0.6 significa que apenas clientes com score acima de 0.6 serão explicados)"
+                },
+                "run_button": "Executar Modelo",
+                "progress": {
+                    "processing": "Processando dados...",
+                    "features": "Gerando perfis de clientes...",
+                    "prepare": "Preparando dados para o modelo...",
+                    "training": "Treinando modelo...",
+                    "scoring": "Gerando scores...",
+                    "explanations": "Gerando explicações...",
+                    "done": "Concluído! (Resultados abaixo)"
+                },
+                "success": "Execução do modelo concluída com sucesso!"
+            },
+            "results": {
+                "title": "2. Resultados do Modelo",
+                "metrics": {
+                    "total": "Total de Clientes",
+                    "high_risk": "Clientes de Alto Risco",
+                    "high_risk_pct": "% de Alto Risco",
+                    "avg_score": "Score Médio"
+                },
+                "chart": {
+                    "title": "Distribuição de Score de Risco",
+                    "x": "Score de Risco",
+                    "y": "Quantidade de Clientes",
+                    "threshold": "Limite de Alto Risco"
+                },
+                "table": {
+                    "title": "Principais clientes com maior risco (acima do limite selecionado)",
+                    "columns": {
+                        "customer_id": "ID do Cliente",
+                        "final_score": "Score de Risco",
+                        "explanation": "Explicação"
+                    }
+                },
+                "download": {
+                    "button": "Baixar Resultados",
+                    "file_name": "resultados_aml.csv"
+                },
+                "empty": "Após executar o modelo, os resultados serão exibidos aqui."
+            }
+        }
+    }
+}
