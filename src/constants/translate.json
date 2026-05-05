@@ -37,6 +37,17 @@
                     "help": "Accepted format: CSV with transaction-level data",
                     "success": "File uploaded successfully"
                 },
+                "csv_details": {
+                    "title": "CSV Format Details",
+                    "description": "Mandatory columns:",
+                    "columns": {
+                        "transaction_date": "Date of the transaction (YYYY-MM-DD)",
+                        "sender_customer": "Unique identifier for the sender customer",
+                        "receiver_customer": "Unique identifier for the receiver customer",
+                        "amount": "Transaction amount"
+                    },
+                    "example": "Example:"
+                },
                 "demo": {
                     "description": "Select the percentage of the demo dataset to load. The demo dataset contains synthetic transaction data for testing purposes.",
                     "label": "Sample percentage",
@@ -127,6 +138,17 @@
                     "help": "Formato aceito: CSV com dados de transações",
                     "success": "Arquivo enviado com sucesso"
                 },
+                "csv_details": {
+                    "title": "Detalhes do Formato CSV",
+                    "description": "Colunas obrigatórias:",
+                    "columns": {
+                        "transaction_date": "Data da transação (YYYY-MM-DD)",
+                        "sender_customer": "Identificador único do cliente remetente",
+                        "receiver_customer": "Identificador único do cliente destinatário",
+                        "amount": "Valor da transação"
+                    },
+                    "example": "Exemplo:"
+                },
                 "demo": {
                     "description": "Selecione a porcentagem do dataset de demonstração a ser carregada. O dataset contém dados sintéticos para testes.",
                     "label": "Porcentagem da amostra",
@@ -168,7 +190,7 @@
                     "columns": {
                         "customer_id": "ID do Cliente",
                         "final_score": "Score de Risco",
-                        "explanation": "Explicação"
+                        "explanation": "Explicacao"
                     }
                 },
                 "download": {

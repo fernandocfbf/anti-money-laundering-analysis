@@ -51,14 +51,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if "lang" not in st.session_state:
-    st.session_state.lang = "EN"
+    st.session_state.lang = "PT"
 
 with st.sidebar:
     lang = st.segmented_control(
         "Language",
         default=st.session_state.lang,
         options=["EN", "PT"],
-        selection_mode="single"
+        selection_mode="single",
+        required=True
     )
 
 # ---- HERO SECTION ----

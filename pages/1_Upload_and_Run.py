@@ -45,7 +45,7 @@ st.markdown("""
 
 # ---- INIT STATE ----
 if "lang" not in st.session_state:
-    st.session_state.lang = "EN"
+    st.session_state.lang = "PT"
 
 if "raw_data" not in st.session_state:
     st.session_state.raw_data = None
@@ -71,7 +71,8 @@ with st.sidebar:
         page_text_dict[st.session_state.lang]["home"]["language"],
         default=st.session_state.lang,
         options=["EN", "PT"],
-        selection_mode="single"
+        selection_mode="single",
+        required=True
     )
     st.session_state.lang = lang
     
@@ -101,10 +102,25 @@ with col_center:
 
         if selection == t["data_source"]["options"]["upload"]:
             st.write(t["data_source"]["upload"]["description"])
+
+            with st.expander(t["data_source"]["csv_details"]["title"]):
+                st.markdown(t["data_source"]["csv_details"]["description"])
+                for col, desc in t["data_source"]["csv_details"]["columns"].items():
+                    st.markdown(f"- **{col}** → {desc}")
+                st.markdown(t["data_source"]["csv_details"]["example"])
+                example_df = pd.DataFrame({
+                    "transaction_date": ["2022-09-09", "2022-09-10"],
+                    "sender_customer": ["80C8896A0_219449", "A123"],
+                    "receiver_customer": ["80E38F1F0_25960", "B456"],
+                    "amount": [225.91, 150.00]
+                })
+                st.dataframe(example_df, use_container_width=True)
+            sample_pct = 100
             uploaded_file = st.file_uploader(
                 t["data_source"]["upload"]["label"],
                 type=["csv"],
-                help=t["data_source"]["upload"]["help"]
+                help=t["data_source"]["upload"]["help"],
+                accept_multiple_files=False
             )
             if uploaded_file is not None:
                 st.session_state.raw_data = pd.read_csv(uploaded_file)
@@ -277,7 +293,7 @@ with col_center:
 
             st.download_button(
                 t["results"]["download"]["button"],
-                data=download_df.to_csv(index=False),
+                data=download_df.to_csv(index=False, encoding="utf-8"),
                 file_name=t["results"]["download"]["file_name"],
                 mime="text/csv",
                 type="primary"
