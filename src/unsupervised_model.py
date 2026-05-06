@@ -12,9 +12,6 @@ from hdbscan import HDBSCAN
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 
-#scipy
-from scipy.spatial.distance import mahalanobis
-
 class IsolationForestModel(BaseEstimator):
     def __init__(self, model_params=None):
         if model_params is None:

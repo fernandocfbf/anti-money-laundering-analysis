@@ -1,5 +1,4 @@
 import pandas as pd
-import pandera.pandas as pa
 from pandera import Column, DataFrameSchema, Check
 from pandera.errors import SchemaError
 
