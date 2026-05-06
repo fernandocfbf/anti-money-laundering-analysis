@@ -8,8 +8,10 @@ from src.utils.model import get_model
 from src.utils.dataset import get_raw_transactions
 from src.explanability import SHAPExplainer
 from src.features import FeatureGenerator
+from src.validator import TransactionValidator
 
 page_text_dict = get_translator()
+
 
 # constants
 DATA_PATH = f"src\\data\\output\\raw_transactions.csv"
@@ -68,21 +70,20 @@ if "threshold" not in st.session_state:
 # ---- SIDEBAR ----
 with st.sidebar:
     lang = st.segmented_control(
-        page_text_dict[st.session_state.lang]["home"]["language"],
+        "Language",
         default=st.session_state.lang,
         options=["EN", "PT"],
         selection_mode="single",
         required=True
     )
-    st.session_state.lang = lang
     
-t = page_text_dict[st.session_state.lang]["upload_and_run"]
+t = page_text_dict[lang]["upload_and_run"]
 
 col_left, col_center, col_right = st.columns([1, 6, 1])
 
 with col_center:
-    st.title(t["page"]["title"])
-    st.caption(t["page"]["subtitle"])
+    st.title(t["page"]["title"], text_alignment="center")
+    st.caption(t["page"]["subtitle"], text_alignment="center")
 
     with st.expander(t["data_source"]["title"], expanded=st.session_state.data_source_expander):
 
@@ -114,7 +115,7 @@ with col_center:
                     "receiver_customer": ["80E38F1F0_25960", "B456"],
                     "amount": [225.91, 150.00]
                 })
-                st.dataframe(example_df, use_container_width=True)
+                st.dataframe(example_df, width="stretch")
             sample_pct = 100
             uploaded_file = st.file_uploader(
                 t["data_source"]["upload"]["label"],
@@ -123,8 +124,14 @@ with col_center:
                 accept_multiple_files=False
             )
             if uploaded_file is not None:
-                st.session_state.raw_data = pd.read_csv(uploaded_file)
-                st.success(t["data_source"]["upload"]["success"])
+                validator = TransactionValidator()
+                df = pd.read_csv(uploaded_file)
+                result = validator.validate(df)
+                if result["is_valid"]:
+                    st.session_state.raw_data = df
+                    st.success(t["data_source"]["upload"]["success"])
+                else:
+                    st.error(t["data_source"]["upload"]["error"])
         else:
             st.write(t["data_source"]["demo"]["description"])
             sample_pct = st.number_input(
@@ -160,7 +167,7 @@ with col_center:
         run_clicked = st.button(
             t["data_source"]["run_button"],
             disabled=run_disabled,
-            use_container_width=True
+            width="stretch"
         )
 
         if run_clicked:

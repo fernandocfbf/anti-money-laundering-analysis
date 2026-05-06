@@ -35,7 +35,8 @@
                     "description": "Upload a CSV file containing transaction-level data. The file must follow the required format with appropriate columns for processing.",
                     "label": "Upload transactions file",
                     "help": "Accepted format: CSV with transaction-level data",
-                    "success": "File uploaded successfully"
+                    "success": "File uploaded successfully",
+                    "error": "Invalid data found in the uploaded file:"
                 },
                 "csv_details": {
                     "title": "CSV Format Details",
@@ -98,6 +99,55 @@
                 },
                 "empty": "After running the model, the results will be displayed here."
             }
+        },
+        "explanation": {
+            "page": {
+                "title": "How the Model Works",
+                "subtitle": "Understand how customer behavior is analyzed and how risk scores are generated"
+            },
+            "overview": {
+                "title": "Overview",
+                "description": "The model evaluates customer transaction behavior using multiple analytical perspectives. All analyses are based on features derived from transaction activity, such as volume, frequency, and behavioral patterns. Each model looks at the same data from a different angle, and their signals are combined into a final risk score."
+            },
+            "layers": {
+                "title": "Analytical Layers",
+                "description": "The model is divided into three complementary layers, each analyzing customer behavior from a different perspective.",
+                "isolation_forest": {
+                    "title": "Global Rarity of Behavior",
+                    "description": "This layer evaluates how unusual a customer is compared to the entire population.",
+                    "question": "How rare is this behavior overall?",
+                    "details": "Customers with transaction patterns that differ significantly from most others are considered higher risk."
+                },
+                "hdbscan": {
+                    "title": "Behavioral Grouping",
+                    "description": "This layer groups customers with similar behavior patterns.",
+                    "question": "Does this customer belong to a clear group, or do they not fit anywhere?",
+                    "details": "Customers that do not belong to any group, or belong to very small or unusual groups, may be considered higher risk."
+                },
+                "mahalanobis": {
+                    "title": "Deviation Within Peer Groups",
+                    "description": "This layer measures how far a customer is from the center of their group.",
+                    "question": "Within similar customers, does this one behave differently?",
+                    "details": "Even if a customer looks normal overall, deviations from their closest peers can indicate risk."
+                }
+            },
+            "combination": {
+                "title": "How Risk Is Determined",
+                "description": "Each layer captures a different type of signal. These signals are combined into a final risk score that reflects multiple dimensions of behavior.",
+                "points": {
+                    "global": "How unusual the behavior is compared to the entire population",
+                    "group": "Whether the customer fits into a behavioral group",
+                    "peer": "How the customer behaves compared to similar peers"
+                }
+            },
+            "explainability": {
+                "title": "Explainability",
+                "description": "Each risk score is supported by explanations that highlight the main contributing factors. This allows users to understand not just that a customer is risky, but what specific behaviors made them stand out."
+            },
+            "key_idea": {
+                "title": "Key Idea",
+                "description": "The model is not trying to directly detect fraud. Instead, it identifies behaviors that stand out enough to deserve further investigation."
+            }
         }
     },
     "PT": {
@@ -111,7 +161,7 @@
                 "analysis": {
                     "title": "Executar Análise",
                     "description": "Envie seu conjunto de dados de transações e gere pontuações de risco AML usando modelos de detecção de anomalias.",
-                    "button": "Enviar e Executar Análise"
+                    "button": "Executar Análise"
                 },
                 "methodology": {
                     "title": "Como Funciona",
@@ -133,10 +183,11 @@
                     "upload": "Enviar CSV"
                 },
                 "upload": {
-                    "description": "Envie um arquivo CSV contendo dados de transações em nível de transação. O arquivo deve seguir o formato esperado com as colunas apropriadas para processamento.",
+                    "description": "Envie um arquivo CSV contendo dados em nível de transação. O arquivo deve seguir o formato esperado com as colunas apropriadas para processamento.",
                     "label": "Enviar arquivo de transações",
                     "help": "Formato aceito: CSV com dados de transações",
-                    "success": "Arquivo enviado com sucesso"
+                    "success": "Arquivo enviado com sucesso",
+                    "error": "Dados inválidos encontrados no arquivo enviado:"
                 },
                 "csv_details": {
                     "title": "Detalhes do Formato CSV",
@@ -198,6 +249,55 @@
                     "file_name": "resultados_aml.csv"
                 },
                 "empty": "Após executar o modelo, os resultados serão exibidos aqui."
+            }
+        },
+        "explanation": {
+            "page": {
+                "title": "Como o Modelo Funciona",
+                "subtitle": "Entenda como o comportamento dos clientes é analisado e como os scores de risco são gerados"
+            },
+            "overview": {
+                "title": "Visão Geral",
+                "description": "O modelo avalia o comportamento transacional dos clientes utilizando múltiplas perspectivas analíticas. Todas as análises são baseadas em variáveis derivadas das transações, como volume, frequência e padrões de comportamento. Cada modelo analisa os mesmos dados sob um ângulo diferente, e seus sinais são combinados em um score final de risco."
+            },
+            "layers": {
+                "title": "Camadas Analíticas",
+                "description": "O modelo é dividido em três camadas complementares, cada uma analisando o comportamento do cliente sob uma perspectiva diferente.",
+                "isolation_forest": {
+                    "title": "Raridade Global do Comportamento",
+                    "description": "Esta camada avalia o quão incomum é um cliente em relação a toda a população.",
+                    "question": "Quão raro é esse comportamento no geral?",
+                    "details": "Clientes com padrões de transação muito diferentes da maioria são considerados de maior risco."
+                },
+                "hdbscan": {
+                    "title": "Agrupamento Comportamental",
+                    "description": "Esta camada agrupa clientes com padrões de comportamento semelhantes.",
+                    "question": "Este cliente pertence a um grupo claro ou não se encaixa em nenhum?",
+                    "details": "Clientes que não pertencem a nenhum grupo, ou que estão em grupos muito pequenos ou incomuns, podem ser considerados de maior risco."
+                },
+                "mahalanobis": {
+                    "title": "Desvio Dentro dos Grupos",
+                    "description": "Esta camada mede o quão distante um cliente está do centro do seu grupo.",
+                    "question": "Entre clientes semelhantes, este se comporta de forma diferente?",
+                    "details": "Mesmo que um cliente pareça normal no geral, desvios em relação aos seus pares podem indicar risco."
+                }
+            },
+            "combination": {
+                "title": "Como o Risco é Determinado",
+                "description": "Cada camada captura um tipo diferente de sinal. Esses sinais são combinados em um score final que reflete múltiplas dimensões do comportamento.",
+                "points": {
+                    "global": "Quão incomum é o comportamento em relação à população",
+                    "group": "Se o cliente se encaixa em um grupo comportamental",
+                    "peer": "Como o cliente se comporta em relação a clientes semelhantes"
+                }
+            },
+            "explainability": {
+                "title": "Explicabilidade",
+                "description": "Cada score de risco é acompanhado por explicações que destacam os principais fatores que contribuíram para o resultado. Isso permite entender não apenas que um cliente é arriscado, mas quais comportamentos o destacaram."
+            },
+            "key_idea": {
+                "title": "Ideia Principal",
+                "description": "O modelo não busca identificar fraude diretamente. Ele identifica comportamentos que se destacam o suficiente para merecer investigação."
             }
         }
     }
