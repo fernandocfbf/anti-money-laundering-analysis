@@ -14,7 +14,7 @@ page_text_dict = get_translator()
 
 
 # constants
-DATA_PATH = f"src\\data\\output\\raw_transactions.csv"
+DATA_PATH = "src/data/output/raw_transactions.csv"
 RANDOM_STATE = 42
 
 st.set_page_config(layout="wide", page_title="AML Analysis")
