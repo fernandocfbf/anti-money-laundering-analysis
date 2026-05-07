@@ -50,12 +50,10 @@
                     "example": "Example:"
                 },
                 "demo": {
-                    "description": "Select the percentage of the demo dataset to load. The demo dataset contains synthetic transaction data for testing purposes.",
-                    "label": "Sample percentage",
-                    "help": "Percentage of the demo dataset to load (e.g., 10 for 10%)"
+                    "description": "The demo data contains synthetic transaction data for testing purposes. Use this option to try out the tool without needing to prepare your own data."
                 },
                 "threshold": {
-                    "description": "Select the score threshold for explaining customers. Only customers with a risk score above this threshold will have explanations generated.",
+                    "description": "Select the score threshold for explaining customers. Only customers with a risk score above this threshold will have explanations generated. The score is a value between 0 and 1 indicating the level of risk, where higher values indicate higher risk.",
                     "label": "Explanability threshold",
                     "help": "Threshold for generating explanations (e.g., 0.6 means only customers with a score above 0.6 will be explained)"
                 },
@@ -201,12 +199,10 @@
                     "example": "Exemplo:"
                 },
                 "demo": {
-                    "description": "Selecione a porcentagem do dataset de demonstração a ser carregada. O dataset contém dados sintéticos para testes.",
-                    "label": "Porcentagem da amostra",
-                    "help": "Porcentagem do dataset a ser carregada (ex: 10 para 10%)"
+                    "description": "Os dados de demostração contêm dados de transações sintéticos para fins de teste. Use essa opção para experimentar a ferramenta sem precisar preparar seus próprios dados."
                 },
                 "threshold": {
-                    "description": "Selecione o limite de score para gerar explicações. Apenas clientes com score acima desse valor terão explicações geradas.",
+                    "description": "Selecione o limite de score para gerar explicações. Apenas clientes com score acima desse valor terão explicações geradas. O score é um valor entre 0 e 1 que indica o nível de risco, onde valores mais altos indicam maior risco.",
                     "label": "Limite de explicabilidade",
                     "help": "Limite para geração de explicações (ex: 0.6 significa que apenas clientes com score acima de 0.6 serão explicados)"
                 },

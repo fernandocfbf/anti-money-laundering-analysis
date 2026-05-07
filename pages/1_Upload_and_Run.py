@@ -134,15 +134,7 @@ with col_center:
                     st.error(t["data_source"]["upload"]["error"])
         else:
             st.write(t["data_source"]["demo"]["description"])
-            sample_pct = st.number_input(
-                t["data_source"]["demo"]["label"],
-                min_value=0.01,
-                max_value=100.0,
-                value=40.0,
-                format="%0.1f",
-                step=0.5,
-                help=t["data_source"]["demo"]["help"]
-            )
+            sample_pct = 100
 
         st.write("")
         st.write(t["data_source"]["threshold"]["description"])
