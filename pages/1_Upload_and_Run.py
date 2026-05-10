@@ -103,7 +103,6 @@ with col_center:
 
         if selection == t["data_source"]["options"]["upload"]:
             st.write(t["data_source"]["upload"]["description"])
-
             with st.expander(t["data_source"]["csv_details"]["title"]):
                 st.markdown(t["data_source"]["csv_details"]["description"])
                 for col, desc in t["data_source"]["csv_details"]["columns"].items():
@@ -135,8 +134,7 @@ with col_center:
         else:
             st.write(t["data_source"]["demo"]["description"])
             sample_pct = 100
-
-        st.write("")
+        st.divider()
         st.write(t["data_source"]["threshold"]["description"])
 
         explanability_threshold = st.number_input(

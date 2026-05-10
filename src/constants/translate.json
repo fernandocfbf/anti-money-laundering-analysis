@@ -179,11 +179,11 @@
                 "input_method": "Escolha o método de entrada",
                 "options": {
                     "demo": "Dados de Demonstração",
-                    "upload": "Enviar CSV"
+                    "upload": "Carregar CSV"
                 },
                 "upload": {
                     "description": "Envie um arquivo CSV contendo dados em nível de transação. O arquivo deve seguir o formato esperado com as colunas apropriadas para processamento.",
-                    "label": "Enviar arquivo de transações",
+                    "label": "Carregar arquivo de transações",
                     "help": "Formato aceito: CSV com dados de transações",
                     "success": "Arquivo enviado com sucesso",
                     "error": "Dados inválidos encontrados no arquivo enviado:"
