@@ -206,7 +206,6 @@ with col_center:
                 ["customer_id", "final_score", "explanation"]
             ]
 
-            st.success(t["data_source"]["success"])
             st.session_state.data_source_expander = False
             st.session_state.results_expander = True
 

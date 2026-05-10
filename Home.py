@@ -63,6 +63,8 @@ with st.sidebar:
     )
 
 # ---- HERO SECTION ----
+st.image("src/images/logo.png", width=150)
+
 st.markdown(f'<h1 class="title">{page_text_dict[lang]["home"]["hero"]["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(
     f'<p class="subtitle">{page_text_dict[lang]["home"]["hero"]["subtitle"]}</p>',
